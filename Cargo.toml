@@ -7,17 +7,16 @@ repository = "https://github.com/havarnov/multimap"
 license = "MIT OR Apache-2.0"
 authors = ["Håvar Nøvik <havar.novik@gmail.com>"]
 documentation = "https://docs.rs/multimap"
-exclude = [
-    ".github/**",
-    ".gitignore",
-]
+exclude = [".github/**", ".gitignore"]
 
 [features]
-serde_impl = ["serde"]
-default = ["serde_impl"]
+serde = ["dep:serde", "hashbrown/serde"]
+default = []
 
 [dependencies]
 serde = { version = "1.0", optional = true }
+hashbrown = { version = "0.14" }
+
 
 [dev-dependencies]
 serde_test = "1.0"

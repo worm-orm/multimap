@@ -10,9 +10,9 @@
 
 extern crate serde;
 
-use std::fmt;
-use std::hash::{BuildHasher, Hash};
-use std::marker::PhantomData;
+use core::fmt;
+use core::hash::{BuildHasher, Hash};
+use core::marker::PhantomData;
 
 use self::serde::de::{MapAccess, Visitor};
 use self::serde::{Deserialize, Deserializer, Serialize, Serializer};

@@ -6,31 +6,35 @@
 // option. All files in the project carrying such notice may not be copied,
 // modified, or distributed except according to those terms.
 
-use std::collections::hash_map::OccupiedEntry as HashMapOccupiedEntry;
-use std::collections::hash_map::VacantEntry as HashMapVacantEntry;
+use core::hash::BuildHasher;
+use core::hash::Hash;
+
+use alloc::{vec, vec::Vec};
+use hashbrown::hash_map::OccupiedEntry as HashMapOccupiedEntry;
+use hashbrown::hash_map::VacantEntry as HashMapVacantEntry;
 
 /// A view into a single occupied location in a MultiMap.
-pub struct OccupiedEntry<'a, K: 'a, V: 'a> {
+pub struct OccupiedEntry<'a, K: 'a, V: 'a, S> {
     #[doc(hidden)]
-    pub inner: HashMapOccupiedEntry<'a, K, Vec<V>>,
+    pub inner: HashMapOccupiedEntry<'a, K, Vec<V>, S>,
 }
 
 /// A view into a single empty location in a MultiMap.
-pub struct VacantEntry<'a, K: 'a, V: 'a> {
+pub struct VacantEntry<'a, K: 'a, V: 'a, S> {
     #[doc(hidden)]
-    pub inner: HashMapVacantEntry<'a, K, Vec<V>>,
+    pub inner: HashMapVacantEntry<'a, K, Vec<V>, S>,
 }
 
 /// A view into a single location in a map, which may be vacant or occupied.
-pub enum Entry<'a, K: 'a, V: 'a> {
+pub enum Entry<'a, K: 'a, V: 'a, S> {
     /// An occupied Entry.
-    Occupied(OccupiedEntry<'a, K, V>),
+    Occupied(OccupiedEntry<'a, K, V, S>),
 
     /// A vacant Entry.
-    Vacant(VacantEntry<'a, K, V>),
+    Vacant(VacantEntry<'a, K, V, S>),
 }
 
-impl<'a, K: 'a, V: 'a> OccupiedEntry<'a, K, V> {
+impl<'a, K: 'a, V: 'a, S> OccupiedEntry<'a, K, V, S> {
     /// Gets a reference to the first item in value in the vector corresponding to entry.
     ///
     /// # Panics
@@ -90,7 +94,7 @@ impl<'a, K: 'a, V: 'a> OccupiedEntry<'a, K, V> {
     }
 }
 
-impl<'a, K: 'a, V: 'a> VacantEntry<'a, K, V> {
+impl<'a, K: 'a + Hash, V: 'a, S: BuildHasher> VacantEntry<'a, K, V, S> {
     /// Sets the first value in the vector of the entry with the VacantEntry's key,
     /// and returns a mutable reference to it.
     pub fn insert(self, value: V) -> &'a mut V {
@@ -104,7 +108,7 @@ impl<'a, K: 'a, V: 'a> VacantEntry<'a, K, V> {
     }
 }
 
-impl<'a, K: 'a, V: 'a> Entry<'a, K, V> {
+impl<'a, K: 'a + Hash, V: 'a, S: BuildHasher> Entry<'a, K, V, S> {
     /// Ensures a value is in the entry by inserting the default if empty, and returns
     /// a mutable reference to the value in the entry. This will return a mutable reference to the
     /// first value in the vector corresponding to the specified key.
